@@ -14,10 +14,14 @@ fn main() {
 
 
     let mut disk = Disk::new(f);
-    let d = disk.volume_boot_record();
-    let x = disk.volume_boot_record();
-    println!("{:#?}",d);
-    println!("{:#?}",x);
+    {
+        let d = disk.volume_boot_record();
+        let x = disk.volume_boot_record();
+        println!("{:#?}",d);
+        println!("First FAT: {:#?}",disk.firstFat());
+        println!("Second FAT: {:#?}",disk.secFat());
+        println!("Root Dir: {:#?}",disk.rootDir());
+    }
     //let c1 = Cluster::new(f, 1024, 512).unwrap();
     //let c2 = Cluster::new(f, 1124, 512).unwrap();
 

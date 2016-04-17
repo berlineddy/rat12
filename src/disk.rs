@@ -12,21 +12,51 @@ use VolumeBootRecord;
 
 pub struct Disk< T: Read + Seek + Write > {
     disk: Mutex<RefCell<T>>,
+    boot_record: Option<VolumeBootRecord>,
 }
 
 impl<T: Read + Seek + Write > Disk<T> {
     pub fn new(descriptor: T ) -> Disk<T> {
-        Disk {
+        let mut d = Disk {
             disk: Mutex::new(RefCell::new(descriptor)),
-        }
+            boot_record: Option::None,
+        };
+        let mut b = d.read_volume_boot_record();
+        d.boot_record = Option::Some(b.expect("no valid volume_boot_record found!"));
+        d
     }
 
-    pub fn cluster(&mut self, begin: u64, size: u64) -> Cluster<T> {
-        Cluster::new(self, begin, size)
-    }
-
-    pub fn volume_boot_record(&mut self) -> io::Result<VolumeBootRecord> {
+    pub fn read_volume_boot_record(&mut self) -> io::Result<VolumeBootRecord> {
         VolumeBootRecord::new(self)
+    }
+
+    //pub fn cluster(&mut self, begin: u64, size: u64) -> Cluster<T> {
+    //    Cluster::new(self, begin, size)
+    //}
+
+    pub fn firstFat(&self) -> u64{
+        let vbr = self.volume_boot_record();
+        vbr.reserved_sector_count as u64
+            * vbr.bytes_per_sector as u64
+            * vbr.boot_sectors as u64
+    }
+
+    pub fn secFat(&self) -> u64{
+        let vbr = self.volume_boot_record();
+        vbr.reserved_sector_count as u64
+            * (vbr.bytes_per_sector as u64
+            * (vbr.boot_sectors as u64 + vbr.root_fat_size as u64) )
+    }
+
+    pub fn rootDir(&self) -> u64{
+        let vbr = self.volume_boot_record();
+        vbr.reserved_sector_count as u64
+            * (vbr.bytes_per_sector as u64
+            * (vbr.boot_sectors as u64 + 2 * vbr.root_fat_size as u64))
+    }
+
+    pub fn volume_boot_record(&self) -> & VolumeBootRecord {
+        self.boot_record.as_ref().unwrap()
     }
 }
 

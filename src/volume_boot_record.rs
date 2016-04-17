@@ -12,6 +12,14 @@ pub enum MediaDescriptor {
 }
 
 #[derive(Debug)]
+pub enum Filesystem {
+    Unknowen,
+    Fat12,
+    Fat16,
+    Fat32,
+}
+
+#[derive(Debug)]
 pub struct VolumeBootRecord {
     pub identifier: String,
     pub bytes_per_sector: u16,
@@ -26,6 +34,13 @@ pub struct VolumeBootRecord {
     pub head_count: u16,
     pub hidden_sectors: u32,
     pub total_sectors: u32,
+    pub drive_number: u8,
+    pub serial_number: [u8; 4],
+    pub label: String,
+    pub fs_type: Filesystem,
+    pub boot_sectors: u8,
+    pub root_fat_size: u8,
+    pub root_dir_size: u8,
 }
 
 
@@ -46,6 +61,13 @@ impl VolumeBootRecord {
             head_count: 0,
             hidden_sectors: 0,
             total_sectors: 0,
+            drive_number: 0,
+            serial_number: [0; 4],
+            label: String::new(),
+            fs_type: Filesystem::Unknowen,
+            boot_sectors: 1,
+            root_fat_size: 9,
+            root_dir_size: 14,
         }
     }
 
@@ -53,6 +75,7 @@ impl VolumeBootRecord {
         descriptor.seek(SeekFrom::Start(0));
 
         let mut ret = VolumeBootRecord::empty();
+
         let mut _buffer: [u8; 0x3] = [0; 0x3];
         descriptor.read(&mut _buffer)?;
         assert!(_buffer == [0xeb, 0x3c, 0x90], "no valid FAT entrypoint!");
@@ -82,6 +105,38 @@ impl VolumeBootRecord {
         ret.head_count = descriptor.read_u16::<LittleEndian>()?;
         ret.hidden_sectors = descriptor.read_u32::<LittleEndian>()?;
         ret.total_sectors = descriptor.read_u32::<LittleEndian>()?;
+        ret.drive_number = descriptor.read_u8()?;
+
+        let mut _buffer: u8 = 0;
+        _buffer = descriptor.read_u8()?;
+
+        let mut _buffer: u8 = 0;
+        _buffer = descriptor.read_u8()?;
+        assert!(_buffer == 0x29, "no valid extended boot signature found!");
+
+        let mut _buffer: [u8; 0x4] = [0; 0x4];
+        descriptor.read(&mut _buffer)?;
+        ret.serial_number = _buffer;
+
+        let mut _buffer: [u8; 0xB] = [0; 0xB];
+        descriptor.read(&mut _buffer)?;
+        ret.label = String::from_utf8_lossy(&_buffer[0..0xB]).into_owned();
+
+        let mut _buffer: [u8; 0x8] = [0; 0x8];
+        descriptor.read(&mut _buffer)?;
+        let fst = String::from_utf8_lossy(&_buffer[0..0x8]).into_owned();
+        ret.fs_type = match fst.as_str() {
+            "FAT12   " => Filesystem::Fat12,
+            "FAT16   " => Filesystem::Fat16,
+            "FAT32   " => Filesystem::Fat32,
+            _ => Filesystem::Unknowen,
+        };
+
+        descriptor.seek(SeekFrom::Start(0x1FE));
+        let mut _buffer: [u8; 0x2] = [0; 0x2];
+        descriptor.read(&mut _buffer)?;
+        assert!(_buffer == [0x55, 0xaa], "no valid FAT signature found!");
+
         Ok(ret)
     }
 }
