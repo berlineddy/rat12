@@ -38,21 +38,26 @@ impl<T: Read + Seek + Write > Disk<T> {
         let vbr = self.volume_boot_record();
         vbr.reserved_sector_count as u64
             * vbr.bytes_per_sector as u64
-            * vbr.boot_sectors as u64
+            * vbr.reserved_sector_count as u64
     }
 
     pub fn secFat(&self) -> u64{
         let vbr = self.volume_boot_record();
         vbr.reserved_sector_count as u64
             * (vbr.bytes_per_sector as u64
-            * (vbr.boot_sectors as u64 + vbr.root_fat_size as u64) )
+            * (vbr.reserved_sector_count as u64 + vbr.root_fat_size as u64) )
     }
 
     pub fn rootDir(&self) -> u64{
         let vbr = self.volume_boot_record();
         vbr.reserved_sector_count as u64
             * (vbr.bytes_per_sector as u64
-            * (vbr.boot_sectors as u64 + 2 * vbr.root_fat_size as u64))
+            * (vbr.reserved_sector_count as u64 + 2 * vbr.root_fat_size as u64))
+    }
+
+    pub fn dataArea(&self) -> u64{
+        let vbr = self.volume_boot_record();
+        vbr.max_root_dir_entries as u64 * 32 
     }
 
     pub fn volume_boot_record(&self) -> & VolumeBootRecord {

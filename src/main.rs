@@ -21,6 +21,7 @@ fn main() {
         println!("First FAT: {:#?}",disk.firstFat());
         println!("Second FAT: {:#?}",disk.secFat());
         println!("Root Dir: {:#?}",disk.rootDir());
+        println!("Data Area: {:#?}",disk.dataArea());
     }
     //let c1 = Cluster::new(f, 1024, 512).unwrap();
     //let c2 = Cluster::new(f, 1124, 512).unwrap();

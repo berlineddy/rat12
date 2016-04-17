@@ -38,7 +38,6 @@ pub struct VolumeBootRecord {
     pub serial_number: [u8; 4],
     pub label: String,
     pub fs_type: Filesystem,
-    pub boot_sectors: u8,
     pub root_fat_size: u8,
     pub root_dir_size: u8,
 }
@@ -65,7 +64,6 @@ impl VolumeBootRecord {
             serial_number: [0; 4],
             label: String::new(),
             fs_type: Filesystem::Unknowen,
-            boot_sectors: 1,
             root_fat_size: 9,
             root_dir_size: 14,
         }
