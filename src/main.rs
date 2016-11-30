@@ -1,11 +1,7 @@
 extern crate rat12;
 
 use std::fs::File;
-use std::io::Read;
-use std::cell::RefCell;
-use std::clone::Clone;
-use rat12::{FatBootSector, Cluster, Disk};
-use std::thread;
+use rat12::Disk;
 
 
 fn main() {

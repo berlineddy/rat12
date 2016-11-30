@@ -10,6 +10,12 @@ pub enum MediaDescriptor {
     HardDisk,
     FloppyDisk(u8),
 }
+impl Default for MediaDescriptor {
+    fn default() -> MediaDescriptor {
+        MediaDescriptor::Unknowen
+    }
+}
+
 
 #[derive(Debug)]
 pub enum Filesystem {
@@ -18,9 +24,13 @@ pub enum Filesystem {
     Fat16,
     Fat32,
 }
+impl Default for Filesystem {
+    fn default() -> Filesystem {
+        Filesystem::Unknowen
+    }
+}
 
-
-#[derive(Debug)]
+#[derive(Debug,Default)]
 pub struct BiosParamterBlock {
     pub bytes_per_sector: u16,
     pub sectord_per_cluster: u8,
@@ -60,7 +70,7 @@ impl BiosParamterBlock {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug,Default)]
 pub struct ExtendedBiosParamterBlock {
     pub drive_number: u8,
     pub check_disk_integrity: u8,
@@ -103,7 +113,8 @@ impl ExtendedBiosParamterBlock {
     }
 }
 
-#[derive(Debug)]
+
+#[derive(Debug,Default)]
 pub struct FatBootSector {
     pub code: Vec<u8>,
     pub os_name: String,
@@ -114,7 +125,7 @@ pub struct FatBootSector {
 }
 impl FatBootSector {
     pub fn new<T: Read + Seek>(descriptor: &mut T) -> io::Result<FatBootSector> {
-        descriptor.seek(SeekFrom::Start(0));
+        let _ = descriptor.seek(SeekFrom::Start(0)).expect("seek failed!");
 
         Ok(FatBootSector {
             code: {
