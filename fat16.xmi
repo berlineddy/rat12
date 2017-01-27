@@ -97,7 +97,7 @@
      </UML:Classifier.feature>
     </UML:Class>
     <UML:Class isSpecification="false" isLeaf="false" visibility="public" namespace="m1" xmi.id="155" isRoot="false" isAbstract="false" name="FileSystemType" />
-    <UML:Class isSpecification="false" isLeaf="false" visibility="public" namespace="m1" xmi.id="2050" isRoot="false" isAbstract="false" name="Disk" >
+    <UML:Class isSpecification="false" isLeaf="false" visibility="public" namespace="m1" xmi.id="2050" isRoot="false" isAbstract="false" name="Partition" >
      <UML:Classifier.feature>
       <UML:Attribute isSpecification="false" visibility="public" xmi.id="2051" initialValue="0x0000 [446]" type="2052" name="boot_loader" ownerScope="classifier" />
       <UML:Attribute isSpecification="false" visibility="public" xmi.id="2053" initialValue="0x1be [16]" type="87" name="partition_1" ownerScope="classifier" />
